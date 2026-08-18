@@ -11,5 +11,14 @@
     { "name": "project_start_date", "label": "Project start date", "type": "date", "required": true },
     { "name": "project_end_date", "label": "Project end date", "type": "date", "required": true },
     { "name": "budget_file", "label": "Budget file", "type": "file", "required": true, "constraints": { "accepted": ["pdf", "xlsx"] } }
+  ],
+  "cross_field_rules": [
+    {
+      "type": "compare",
+      "field": "project_end_date",
+      "operator": "gte",
+      "other_field": "project_start_date",
+      "message": "Project end date must not be before project start date"
+    }
   ]
 }

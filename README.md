@@ -34,26 +34,101 @@ Supported field types today: `text`, `long_text`, `number`, `boolean`, `date` (`
 
 The three client definition files are the actual field lists for the three clients described in the brief (Client A / City maintenance, Client B / Grant-making foundation, Client C / Private clinic) — field names match what the brief describes. They're here so you have real, non-trivial definitions to test against rather than inventing your own.
 
-**What the library does *not* do yet: cross-field validation.** Every check today looks at exactly one field in isolation. There's no way, today, to express "the project end date must not be before the project start date" — that rule spans two fields, and nothing in the current format has a place to put it.
+Definitions may now include top-level `cross_field_rules`. These rules compare two declared fields after ordinary per-field validation has completed.
 
-## The task
+## Cross-field rule format
 
-Add cross-field validation to both the definition format and the library, so a rule like the one above can be **declared as data**, not written as a one-off `if` statement in application code.
+The supported rule type is `compare`:
 
-There's no single right answer here — that's deliberate. You'll need to decide (and this is the part we actually care about):
+```json
+{
+  "fields": [
+    {
+      "name": "project_start_date",
+      "label": "Project start date",
+      "type": "date",
+      "required": true
+    },
+    {
+      "name": "project_end_date",
+      "label": "Project end date",
+      "type": "date",
+      "required": true
+    }
+  ],
+  "cross_field_rules": [
+    {
+      "type": "compare",
+      "field": "project_end_date",
+      "operator": "gte",
+      "other_field": "project_start_date",
+      "message": "Project end date must not be before project start date"
+    }
+  ]
+}
+```
 
-- **How a rule refers to another field.** What does the declaration look like? How does it name the field(s) it depends on?
-- **Which field the error is reported against.** If `project_end_date` is before `project_start_date`, does the error attach to the end date, the start date, or both? Pick one and say why.
-- **What happens when a dependency is missing.** If a rule needs `project_start_date` and it wasn't submitted (or itself failed its own per-field validation), does the cross-field rule still run? Silently pass? Silently fail? This should be a deliberate choice, not whatever happens to fall out of the code.
-- **Where you decided to stop.** A single date-comparison rule is easy to hardcode. A rule engine that can express arbitrary logic is a project. Somewhere between those is a boundary that covers real cases without turning the definition format into a programming language — where you draw that line, and why, matters more than how much you built.
+Each rule has the following properties:
 
-Write all of this up in this README (replace this section, or add to it — your call), precisely enough that someone else could implement a new cross-field rule correctly from your description alone, without reading your code first.
+- `type` — required; currently must be `"compare"`.
+- `field` — required; the left-hand value in the comparison and the field that receives an error when the comparison fails.
+- `operator` — required; one of `eq`, `neq`, `gt`, `gte`, `lt`, or `lte`.
+- `other_field` — required; the right-hand value and dependency of `field`.
+- `message` — optional; a non-empty error message. If omitted, the library builds a message from the two field labels and the operator.
 
-**Constraints on the implementation:**
+The example reads as `project_end_date >= project_start_date`. A failed rule returns one error against `project_end_date`, not both fields. The value entered in the end-date field is the value the user needs to correct; attaching the same error to both inputs would add noise without identifying a second fault.
 
-- The existing tests in `test/validate.test.js` must still pass. If you change the behavior of an existing test, say why in your writeup.
-- Add tests for your new behavior, including the awkward cases above (missing dependency, invalid dependency, etc.) — not just the happy path.
-- Keep `lib/` client-agnostic: no client names, and no client-specific field names, anywhere in `lib/`. The three files under `clients/` are examples/fixtures, not part of the library.
+## Supported comparisons
 
-We'll take your documented format and, after you submit, write a cross-field rule against a client and field set you haven't seen, following only your README. If we can write that rule correctly from your description, and your code handles it, that's the bar.
-# platform-foundation
+Both referenced fields must exist in `fields` and have exactly the same type. Values are never coerced.
+
+| Field type | `eq` / `neq` | `gt` / `gte` / `lt` / `lte` |
+| --- | --- | --- |
+| `number` | Yes | Yes |
+| `date` | Yes | Yes |
+| `text` | Yes | No |
+| `long_text` | Yes | No |
+| `boolean` | Yes | No |
+| `choice` | Yes | No |
+| `multi_choice` | No | No |
+| `file` | No | No |
+
+Dates are compared as validated `YYYY-MM-DD` calendar dates. Because the representation is fixed-width and ordered from year to day, lexical and chronological ordering are the same. Numbers must be finite JavaScript numbers. Equality comparisons use strict equality.
+
+Rules are evaluated in declaration order. If multiple rules fail, each produces its own error in that order, including when more than one rule targets the same field.
+
+## Missing and invalid dependencies
+
+`validateRecord` performs all per-field validation first. A cross-field rule runs only when:
+
+1. `field` is present and has no per-field error; and
+2. `other_field` is present and has no per-field error.
+
+If either value is absent, the rule is skipped. A required field still receives its normal required error; an absent optional field does not. If either value is present but invalid, its existing type or constraint error is returned and the comparison is skipped. This prevents a malformed date, for example, from also producing a misleading date-order error.
+
+Skipping a rule does not mean that an invalid record passes: the per-field error still makes `valid` false. It only avoids cascading errors whose prerequisites were not met.
+
+## Invalid rule definitions
+
+Definitions are trusted configuration rather than user input, so malformed rules fail loudly with `TypeError` before record validation. This includes:
+
+- a non-array `cross_field_rules` value;
+- an unknown rule type or operator;
+- missing, blank, identical, or unknown field references;
+- different field types on the two sides;
+- an operator that does not support the referenced type; and
+- an empty or non-string custom message.
+
+Silently ignoring a bad rule could admit records that the definition author intended to reject. Throwing makes a deployment or configuration mistake visible immediately.
+
+## Deliberate boundary
+
+The implementation is a comparison vocabulary, not a general expression language. It intentionally does not support arbitrary JavaScript, nested `and`/`or` expressions, arithmetic, constant operands, cross-type coercion, asynchronous lookups, or client-specific rule handlers. Existing per-field constraints already cover comparisons against constants.
+
+This boundary covers common relationships such as date ranges, numeric minimum/maximum pairs, and confirmation fields while keeping definitions reviewable JSON. More complex workflow or scoring policy belongs in a separately versioned policy component, not in basic record validation.
+
+## Compatibility and tests
+
+Definitions without `cross_field_rules` behave as before, and none of the original tests were changed. The suite now contains 32 passing tests: the original 16 plus 16 tests for comparison success and failure, equality boundaries, missing and invalid dependencies, optional dependencies, default and custom messages, rule order, malformed definitions, impossible calendar dates, and non-finite numbers.
+
+The implementation remains client-agnostic. No client names or client-specific field names appear in `lib/`.
