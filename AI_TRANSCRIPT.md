@@ -4,7 +4,8 @@ This is the public transcript of the Codex task used to investigate, implement, 
 
 - **Candidate:** Michael John C. Revilla
 - **Tool:** Codex desktop agent
-- **Model disclosed in the submission:** GPT-5
+- **Model:** GPT-5.6 Sol
+- **Reasoning setting:** High
 - **Task date:** August 2026 (Philippine Time)
 - **Codex task:** `Review codebase task`
 
@@ -418,3 +419,69 @@ For this submission, the recommended approach was:
 ### Export note
 
 This request produced the file you are currently reading. The same final change replaces the website’s transcript placeholder with this file’s public GitHub URL and corrects the canonical/social metadata to use the final Vercel domain. The resulting code, tests, and build are recorded in the repository history.
+
+---
+
+## 11. Verifying the social-preview hostname
+
+### User
+
+> The social-preview image references the older platform-foundation-eight.vercel.app hostname. I’ll update the metadata to use the final domain.
+>
+> have you checked this? Was it fixed already?
+
+### Assistant
+
+Yes. The live deployment was checked again and both social-image tags used the final hostname:
+
+- Open Graph image: `https://platform-foundation-benoz.vercel.app/og.png`
+- Twitter image: `https://platform-foundation-benoz.vercel.app/og.png`
+- The old `platform-foundation-eight.vercel.app` hostname was not present.
+
+---
+
+## 12. Making the model disclosure precise
+
+### User
+
+Attached: `codex-clipboard-bd1bd19a-b59d-48c7-9a7a-d2069eea3d44.png`
+
+> Should we specify 5.6 Sol High?
+
+### Assistant
+
+Yes—use the exact configuration. The recommended presentation was:
+
+**Codex · GPT-5.6 Sol**
+
+*Reasoning effort: High*
+
+This is clearer than “GPT-5” because it distinguishes the model from its reasoning setting. The webpage and transcript should use the same disclosure.
+
+---
+
+## 13. Test coverage
+
+### User
+
+> Did we write tests? If yes, what was it?
+
+### Assistant
+
+Yes. The repository uses Node’s built-in `node:test` runner in `test/validate.test.js`.
+
+There are 32 tests total: 16 original tests for the existing Client A, B, and C behavior, plus 16 added tests covering valid and invalid date comparisons, equal `gte` boundaries, error-field ownership, custom and default messages, missing or invalid dependencies without duplicate errors, number comparisons, scalar equality, multiple-rule order, malformed rules, unknown references, unsupported operators, incompatible types, impossible dates, and non-finite numbers.
+
+The suite runs with `npm test`. Its verified result was 32 passed and 0 failed.
+
+---
+
+## 14. Final disclosure update
+
+### User
+
+> Good. Now update what it needs to be updated
+
+### Export note
+
+This request updated the public webpage and transcript to disclose **GPT-5.6 Sol** with **High reasoning** consistently. The test suite, lint check, production build, Git history, and live deployment were then refreshed and verified.
