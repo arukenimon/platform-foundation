@@ -150,7 +150,9 @@ code { font-family: var(--font-geist-mono), monospace; font-size: .88em; }
 .transcript-callout > div > span { color: var(--accent-dark); }
 .transcript-callout h3 { margin: .7rem 0 .5rem; font-size: 1.45rem; }
 .transcript-callout p { max-width: 45rem; }
-.pending-label { flex: 0 0 auto; padding: .55rem .75rem; background: var(--critical-soft); color: var(--critical); font: 750 .65rem var(--font-geist-mono), monospace; letter-spacing: .07em; text-transform: uppercase; }
+.transcript-link { flex: 0 0 auto; padding: .75rem 1rem; background: var(--ink); color: var(--white); font: 750 .68rem var(--font-geist-mono), monospace; letter-spacing: .06em; text-decoration: none; text-transform: uppercase; transition: background-color .18s ease, transform .18s ease; }
+.transcript-link:hover { background: var(--accent-dark); transform: translateY(-1px); }
+.transcript-link:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 .ai-notes { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; margin-top: 3rem; background: var(--line); border: 1px solid var(--line); }
 .ai-notes article { min-height: 20rem; padding: clamp(1.6rem,4vw,3rem); background: var(--paper-deep); }
 .ai-notes article > span { color: var(--accent-dark); }

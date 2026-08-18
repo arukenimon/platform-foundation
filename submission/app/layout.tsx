@@ -12,18 +12,21 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const productionHost = process.env.VERCEL_PROJECT_PRODUCTION_URL;
-const siteUrl = productionHost ? `https://${productionHost}` : "http://localhost:3000";
+const siteUrl = "https://platform-foundation-benoz.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: "Platform Foundation · Michael John C. Revilla",
   description:
     "Benoz.AI Platform Foundation take-home: architecture review, validation library extension, and platform decisions.",
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     title: "Platform Foundation · Michael John C. Revilla",
     description: "Architecture review, validation library extension, and platform decisions.",
     type: "website",
+    url: "/",
     images: [{ url: "/og.png", width: 1200, height: 630, alt: "Platform Foundation — Judgment before machinery" }],
   },
   twitter: {

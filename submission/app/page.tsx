@@ -1,4 +1,5 @@
 const repositoryUrl = "https://github.com/arukenimon/platform-foundation";
+const transcriptUrl = `${repositoryUrl}/blob/master/AI_TRANSCRIPT.md`;
 
 const findings = [
   {
@@ -248,9 +249,9 @@ export default function Home() {
             <div><h2>How I used AI</h2><p>I used AI as a reviewer and implementation partner. I did not delegate the final trade-offs to it.</p></div>
           </div>
 
-          <div className="transcript-callout" data-needs-transcript="true">
-            <div><span>Required before publishing</span><h3>Public AI transcript link</h3><p>The complete Codex conversation will be linked here after export. Only secrets or unrelated personal data will be redacted and any redaction will be labelled.</p></div>
-            <span className="pending-label">Link pending</span>
+          <div className="transcript-callout">
+            <div><span>Public record</span><h3>Codex conversation transcript</h3><p>The task transcript includes the investigation, trade-offs, implementation decisions, deployment troubleshooting, and publication steps. Its export notes identify exactly what is excluded.</p></div>
+            <a className="transcript-link" href={transcriptUrl} target="_blank" rel="noreferrer">Read transcript <span aria-hidden="true">↗</span></a>
           </div>
 
           <div className="ai-notes">
