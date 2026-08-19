@@ -250,7 +250,7 @@ export default function Home() {
           </div>
 
           <div className="transcript-callout">
-            <div><span>Public record</span><h3>Codex conversation transcript</h3><p>The task transcript includes the investigation, trade-offs, implementation decisions, deployment troubleshooting, and publication steps. Its export notes identify exactly what is excluded.</p></div>
+            <div><span>Public record</span><h3>Verbatim Codex conversation</h3><p>The exact visible user and assistant messages cover the investigation, trade-offs, implementation decisions, deployment troubleshooting, and publication steps. The export notes identify the non-conversational data that is excluded.</p></div>
             <a className="transcript-link" href={transcriptUrl} target="_blank" rel="noreferrer">Read transcript <span aria-hidden="true">↗</span></a>
           </div>
 
